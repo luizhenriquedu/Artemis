@@ -11,6 +11,10 @@ int single_chars[] = {
     ['{'] = TOK_LBRAC,
     ['}'] = TOK_RBRAC,
     [';'] = TOK_SEMI,
+    ['*'] = TOK_STAR,
+    ['+'] = TOK_PLUS,
+    ['/'] = TOK_DIV,
+    ['%'] = TOK_MOD,
 };
 
 lexer_t *lexer_create(char *filename, char *buffer)
@@ -119,11 +123,15 @@ int lexer_step(lexer_t *lexer)
             lexer_create_token(lexer, TOK_ARROW, start, lexer->idx - start, row, col);
             break;
         }
-        printf("Unexpected character at %d:%d.\n", lexer->pos.row, lexer->pos.col);
-        return 0;
+        lexer->pos.col++;
+        NEXT_CHAR(lexer);
+        lexer_create_token(lexer, TOK_MINUS, start, lexer->idx - start, row, col);
         break;
     }
-
+    case '+':
+    case '/':
+    case '*':
+    case '%':
     case '(':
     case ')':
     case '{':
@@ -139,6 +147,7 @@ int lexer_step(lexer_t *lexer)
         lexer_create_token(lexer, type, start, lexer->idx - start, row, col);
         break;
     }
+
     default:
         printf("Unexpected character at %d:%d.\n", lexer->pos.row, lexer->pos.col);
         return 0;
