@@ -8,7 +8,7 @@ enum
 
     TOK_STRING,
     TOK_FLOAT,
-    TOK_INT,
+    TOK_NUM,
     TOK_CHAR,
 
     TOK_LPAR,
@@ -56,6 +56,7 @@ enum
     TOK_FN,
     TOK_VAR,
     TOK_RET,
+    TOK_ARROW,
 };
 
 typedef struct
