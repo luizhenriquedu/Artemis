@@ -53,9 +53,10 @@ enum
 
     TOK_IF,
     TOK_ELSE,
-    TOK_WHILE,
-    TOK_FOR,
     TOK_FN,
+
+    TOK_FOR,
+    TOK_WHILE,
     TOK_VAR,
     TOK_RET,
     TOK_ARROW,
