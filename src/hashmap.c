@@ -1,4 +1,4 @@
-#include <include/hashmap.h>
+#include "include/hashmap.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -19,6 +19,8 @@ hashmap_t *hashmap_create(size_t size, size_t max_collisions)
 {
     hashmap_t *map = (hashmap_t *)malloc(sizeof(hashmap_t));
     map->size = size;
+    map->table = (hashmap_table_t *)malloc(sizeof(hashmap_table_t) * size);
+    memset(map->table, 0, sizeof(map->table) * size);
     map->max_collisions = max_collisions;
     return map;
 }
@@ -27,7 +29,7 @@ void hashmap_add(hashmap_t *hashmap, char *key, void *data)
 {
 start:
 {
-    uint64_t index = hash(key, hashmap->size);
+    uint64_t index = hashmap_hash(key, hashmap->size);
 
     hashmap_table_t *table = &hashmap->table[index];
     if (table->entries == NULL || table->collisions == 0)
@@ -37,15 +39,27 @@ start:
         table->collisions = 0;
     }
 
-    if (table->collisions == hashmap->max_collisions)
-    {
-
-        goto start;
-    }
-
     uint64_t idx = table->collisions++;
     table->entries[idx].key = (char *)malloc(strlen(key));
     strcpy(table->entries[idx].key, key);
     table->entries[idx].data = data;
 }
+}
+
+void *hashmap_search(hashmap_t *hashmap, char *key)
+{
+    uint64_t index = hashmap_hash(key, hashmap->size);
+    hashmap->flags = 0;
+    hashmap_table_t *table = &hashmap->table[index];
+    if (table->entries == NULL || table->collisions == 0)
+    {
+        hashmap->flags = 1;
+        return NULL;
+    }
+    for (uint64_t i = 0; i < table->collisions; i++)
+    {
+        if (!strcmp(key, table->entries[i].key))
+            return table->entries[i].data;
+    }
+    return NULL;
 }

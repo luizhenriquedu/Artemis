@@ -17,6 +17,16 @@ int single_chars[] = {
     ['%'] = TOK_MOD,
 };
 
+void lexer_init_hashmap(lexer_t *lexer)
+{
+    lexer->hashmap_keyword = hashmap_create(30, 5);
+    char *keywords_list[] = {"if", "else", "fn", "return", "while", "for", "enum", "true", "false"};
+    for (int i = 0; i < 8; i++)
+    {
+        hashmap_add(lexer->hashmap_keyword, keywords_list[i], (void *)TOK_IF + i);
+    }
+}
+
 lexer_t *lexer_create(char *filename, char *buffer)
 {
     lexer_t *lexer = (lexer_t *)malloc(sizeof(lexer_t));
@@ -27,10 +37,12 @@ lexer_t *lexer_create(char *filename, char *buffer)
     lexer->buffer = buffer;
     lexer->tk_list = list_create();
 
+    lexer_init_hashmap(lexer);
+
     return lexer;
 }
 
-void lexer_create_token(lexer_t *lexer, int type, int start, int lenght, int row, int col)
+token_t *lexer_create_token(lexer_t *lexer, int type, int start, int lenght, int row, int col)
 {
     token_t *token = (token_t *)malloc(sizeof(token_t));
     token->type = type;
@@ -40,6 +52,8 @@ void lexer_create_token(lexer_t *lexer, int type, int start, int lenght, int row
     token->text = lexer->buffer + start;
     token->text_len = lenght;
     list_add(lexer->tk_list, token);
+
+    return token;
 }
 
 int lexer_step(lexer_t *lexer)
@@ -70,6 +84,7 @@ int lexer_step(lexer_t *lexer)
         int start = lexer->idx;
         int col = lexer->pos.col;
         int row = lexer->pos.row;
+        char *buffer;
 
         while (
             lexer->c >= 'a' && lexer->c <= 'z' || lexer->c >= 'A' && lexer->c <= 'Z' || lexer->c >= '0' && lexer->c <= '9' || lexer->c == '_')
@@ -77,7 +92,10 @@ int lexer_step(lexer_t *lexer)
             lexer->pos.col++;
             NEXT_CHAR(lexer);
         }
-        lexer_create_token(lexer, TOK_ID, start, lexer->idx - start, row, col);
+
+        token_t *t = lexer_create_token(lexer, TOK_ID, start, lexer->idx - start, row, col);
+        void *data = hashmap_search(lexer->hashmap_keyword, t->text);
+
         break;
     }
 
