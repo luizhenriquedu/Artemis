@@ -14,7 +14,7 @@ int single_chars[] = {
     ['+'] = TOK_PLUS,
     ['/'] = TOK_DIV,
     ['%'] = TOK_MOD,
-};
+    ['='] = TOK_EQ};
 
 void lexer_init_hashmap(lexer_t *lexer)
 {
@@ -23,7 +23,7 @@ void lexer_init_hashmap(lexer_t *lexer)
     for (int i = 0; i < 7; i++)
     {
         hashmap_insert(lexer->hashmap_keyword, keywords_list[i], (void *)TOK_IF + i);
-        }
+    }
 }
 
 lexer_t *lexer_create(char *filename, char *buffer)
@@ -60,7 +60,6 @@ int lexer_lex_keywords(lexer_t *lexer, char *start, char *end)
     char kw[end - start + 1];
     strncpy(kw, start, end - start);
     kw[end - start] = 0;
-    printf("%s\n", kw);
     return (int)hashmap_search(lexer->hashmap_keyword, kw);
 }
 
@@ -101,8 +100,7 @@ int lexer_step(lexer_t *lexer)
         }
 
         int kw = lexer_lex_keywords(lexer, cstart, lexer->buffer + lexer->idx);
-        printf("%d\n", kw);
-        list_add(lexer->tk_list, lexer_create_token(lexer, (kw > 0 ? kw : TOK_ID), start, lexer->idx - start, row, col));
+        lexer_create_token(lexer, (kw > 0 ? kw : TOK_ID), start, lexer->idx - start, row, col);
         break;
     }
 
@@ -133,7 +131,7 @@ int lexer_step(lexer_t *lexer)
         }
         lexer->pos.col++;
         NEXT_CHAR(lexer);
-        lexer_create_token(lexer, TOK_STRING, start, lexer->idx - start, row, col);
+        lexer_create_token(lexer, TOK_STRING, start, lexer->idx - start - 1, row, col);
         break;
     case '-':
     {
@@ -162,6 +160,7 @@ int lexer_step(lexer_t *lexer)
     case '{':
     case '}':
     case ';':
+    case '=':
     {
         int start = lexer->idx;
         int row = lexer->pos.row;

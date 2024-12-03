@@ -66,6 +66,7 @@ void *hashmap_search(hashmap_t *hashmap, char *key)
 
     if (table->entries == NULL || table->collisions == 0)
     {
+        printf("{\n\tkey: %s,\n\t message: NOT_FOUND\n}\n", key);
         return NULL;
     }
 
@@ -73,9 +74,11 @@ void *hashmap_search(hashmap_t *hashmap, char *key)
     {
         if (!strcmp(key, table->entries[i].key))
         {
+
             return table->entries[i].data;
         }
     }
+    return NULL;
 }
 
 void hashmap_resize(hashmap_t *hashmap, size_t new_size, size_t new_collisions)
