@@ -1,5 +1,7 @@
 #pragma once
 #include "list.h"
+#include "../hashmap.h"
+
 enum
 {
     TOK_EOF = 0,
@@ -51,9 +53,10 @@ enum
 
     TOK_IF,
     TOK_ELSE,
-    TOK_WHILE,
-    TOK_FOR,
     TOK_FN,
+
+    TOK_FOR,
+    TOK_WHILE,
     TOK_VAR,
     TOK_RET,
     TOK_ARROW,
@@ -80,6 +83,7 @@ typedef struct
     char *buffer;
     char c;
     int idx;
+    hashmap_t *hashmap_keyword;
     list_t *tk_list;
 } lexer_t;
 

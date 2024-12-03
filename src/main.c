@@ -55,9 +55,10 @@ char *tok_types[] = {
 
     "TOK_IF",
     "TOK_ELSE",
-    "TOK_WHILE",
-    "TOK_FOR",
+
     "TOK_FN",
+    "TOK_FOR",
+    "TOK_WHILE",
     "TOK_VAR",
     "TOK_RET",
     "TOK_ARROW",
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
         token_t *tok = (token_t *)item->data;
         printf("%s - %.*s\n", tok_types[tok->type], tok->text_len, tok->text);
     }
+
     return 0;
 }
 

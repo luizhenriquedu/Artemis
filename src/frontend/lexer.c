@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/frontend/lexer.h"
-#include "../include/frontend/lexer.h"
 #define NEXT_CHAR(lexer) lexer->c = lexer->buffer[++lexer->idx]
 
 int single_chars[] = {
@@ -15,7 +14,17 @@ int single_chars[] = {
     ['+'] = TOK_PLUS,
     ['/'] = TOK_DIV,
     ['%'] = TOK_MOD,
-};
+    ['='] = TOK_EQ};
+
+void lexer_init_hashmap(lexer_t *lexer)
+{
+    lexer->hashmap_keyword = hashmap_create(30, 5);
+    char *keywords_list[] = {"if", "else", "fn", "for", "while", "var", "return"};
+    for (int i = 0; i < 7; i++)
+    {
+        hashmap_insert(lexer->hashmap_keyword, keywords_list[i], (void *)TOK_IF + i);
+    }
+}
 
 lexer_t *lexer_create(char *filename, char *buffer)
 {
@@ -27,10 +36,12 @@ lexer_t *lexer_create(char *filename, char *buffer)
     lexer->buffer = buffer;
     lexer->tk_list = list_create();
 
+    lexer_init_hashmap(lexer);
+
     return lexer;
 }
 
-void lexer_create_token(lexer_t *lexer, int type, int start, int lenght, int row, int col)
+token_t *lexer_create_token(lexer_t *lexer, int type, int start, int lenght, int row, int col)
 {
     token_t *token = (token_t *)malloc(sizeof(token_t));
     token->type = type;
@@ -40,12 +51,24 @@ void lexer_create_token(lexer_t *lexer, int type, int start, int lenght, int row
     token->text = lexer->buffer + start;
     token->text_len = lenght;
     list_add(lexer->tk_list, token);
+
+    return token;
+}
+
+int lexer_lex_keywords(lexer_t *lexer, char *start, char *end)
+{
+    char kw[end - start + 1];
+    strncpy(kw, start, end - start);
+    kw[end - start] = 0;
+    return (int)hashmap_search(lexer->hashmap_keyword, kw);
 }
 
 int lexer_step(lexer_t *lexer)
 {
+
     switch (lexer->c)
     {
+
     case '\0':
 
         return 0;
@@ -61,7 +84,7 @@ int lexer_step(lexer_t *lexer)
         NEXT_CHAR(lexer);
     case '\r':
         lexer->pos.col = 1;
-        NEXT_CHAR(lexer);
+
         break;
     case 'a' ... 'z':
     case 'A' ... 'Z':
@@ -70,14 +93,16 @@ int lexer_step(lexer_t *lexer)
         int start = lexer->idx;
         int col = lexer->pos.col;
         int row = lexer->pos.row;
-
+        char *cstart = lexer->buffer + lexer->idx;
         while (
             lexer->c >= 'a' && lexer->c <= 'z' || lexer->c >= 'A' && lexer->c <= 'Z' || lexer->c >= '0' && lexer->c <= '9' || lexer->c == '_')
         {
             lexer->pos.col++;
             NEXT_CHAR(lexer);
         }
-        lexer_create_token(lexer, TOK_ID, start, lexer->idx - start, row, col);
+
+        int kw = lexer_lex_keywords(lexer, cstart, lexer->buffer + lexer->idx);
+        lexer_create_token(lexer, (kw > 0 ? kw : TOK_ID), start, lexer->idx - start, row, col);
         break;
     }
 
@@ -128,6 +153,7 @@ int lexer_step(lexer_t *lexer)
         lexer_create_token(lexer, TOK_MINUS, start, lexer->idx - start, row, col);
         break;
     }
+    case '}':
     case '+':
     case '/':
     case '*':
@@ -135,14 +161,15 @@ int lexer_step(lexer_t *lexer)
     case '(':
     case ')':
     case '{':
-    case '}':
     case ';':
+    case '=':
     {
         int start = lexer->idx;
         int row = lexer->pos.row;
         int col = lexer->pos.col;
         int type = single_chars[lexer->c];
         NEXT_CHAR(lexer);
+
         lexer->pos.col++;
         lexer_create_token(lexer, type, start, lexer->idx - start, row, col);
         break;
