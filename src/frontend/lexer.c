@@ -82,6 +82,7 @@ int lexer_step(lexer_t *lexer)
         lexer->pos.col = 1;
         lexer->pos.row++;
         NEXT_CHAR(lexer);
+        break;
     case '\r':
         lexer->pos.col = 1;
 
