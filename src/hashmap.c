@@ -66,7 +66,7 @@ void *hashmap_search(hashmap_t *hashmap, char *key)
 
     if (table->entries == NULL || table->collisions == 0)
     {
-        printf("{\n\tkey: %s,\n\t message: NOT_FOUND\n}\n", key);
+
         return NULL;
     }
 

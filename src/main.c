@@ -76,6 +76,7 @@ int main(int argc, char **argv)
         token_t *tok = (token_t *)item->data;
         printf("%s - %.*s\n", tok_types[tok->type], tok->text_len, tok->text);
     }
+
     return 0;
 }
 

@@ -1,5 +1,5 @@
 fn main() -> i32 {
-    var x = 4;
-    var y = x - 2;
-    print("Hello, World!");
- }
+var x = 4;
+var y = x - 2;
+print("Hello, World!");
+}

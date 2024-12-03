@@ -65,8 +65,10 @@ int lexer_lex_keywords(lexer_t *lexer, char *start, char *end)
 
 int lexer_step(lexer_t *lexer)
 {
+
     switch (lexer->c)
     {
+
     case '\0':
 
         return 0;
@@ -82,7 +84,7 @@ int lexer_step(lexer_t *lexer)
         NEXT_CHAR(lexer);
     case '\r':
         lexer->pos.col = 1;
-        NEXT_CHAR(lexer);
+
         break;
     case 'a' ... 'z':
     case 'A' ... 'Z':
@@ -131,7 +133,7 @@ int lexer_step(lexer_t *lexer)
         }
         lexer->pos.col++;
         NEXT_CHAR(lexer);
-        lexer_create_token(lexer, TOK_STRING, start, lexer->idx - start - 1, row, col);
+        lexer_create_token(lexer, TOK_STRING, start, lexer->idx - start, row, col);
         break;
     case '-':
     {
@@ -151,6 +153,7 @@ int lexer_step(lexer_t *lexer)
         lexer_create_token(lexer, TOK_MINUS, start, lexer->idx - start, row, col);
         break;
     }
+    case '}':
     case '+':
     case '/':
     case '*':
@@ -158,7 +161,6 @@ int lexer_step(lexer_t *lexer)
     case '(':
     case ')':
     case '{':
-    case '}':
     case ';':
     case '=':
     {
@@ -167,6 +169,7 @@ int lexer_step(lexer_t *lexer)
         int col = lexer->pos.col;
         int type = single_chars[lexer->c];
         NEXT_CHAR(lexer);
+
         lexer->pos.col++;
         lexer_create_token(lexer, type, start, lexer->idx - start, row, col);
         break;
